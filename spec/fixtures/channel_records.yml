@@ -1,0 +1,17 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  date: 2010-07-17
+  signups: 1
+  activations: 1
+  firstcalls: 1
+  brand_id: 1
+  channel_id: 1
+
+two:
+  date: 2010-07-17
+  signups: 1
+  activations: 1
+  firstcalls: 1
+  brand_id: 1
+  channel_id: 1
