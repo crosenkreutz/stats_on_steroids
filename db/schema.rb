@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100717173749) do
+ActiveRecord::Schema.define(:version => 20100717175352) do
 
   create_table "brands", :force => true do |t|
     t.string   "name"
@@ -31,6 +31,17 @@ ActiveRecord::Schema.define(:version => 20100717173749) do
 
   create_table "channels", :force => true do |t|
     t.string   "name"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "total_records", :force => true do |t|
+    t.date     "date"
+    t.integer  "signups"
+    t.integer  "activations"
+    t.integer  "firstcalls"
+    t.integer  "active"
+    t.integer  "brand_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
