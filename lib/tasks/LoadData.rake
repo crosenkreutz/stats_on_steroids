@@ -1,5 +1,5 @@
 require './lib/tasks/FormatData'
 
-task :AutomaticDownload do
+task :AutomaticDownload => :environment do
   FormatAndStore()
 end

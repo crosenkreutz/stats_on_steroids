@@ -18,7 +18,8 @@ def FormatAndStore()
   end
 
   latest_date = 0
-  report = Nokogiri::HTML(open("#{path}Fonic/Original Message 3951.eml"))
+  latest_date_string = ""
+  report = Nokogiri::HTML(open("#{path}Fonic/Original Message 5163.eml"))
 
   headings = report.xpath('//b[contains(text(),"14 Days")]')
   tables = report.xpath('//b[contains(text(),"14 Days")][1]/following::table')
@@ -39,14 +40,16 @@ def FormatAndStore()
 
         date_array = ParseDate::parsedate(date_string)
         date = Time.local(*date_array).to_i
-        latest_date = date if date > latest_date
-        puts date
+	if date > latest_date then
+          latest_date = date
+	  latest_date_string = date_string
+	end
 
-        table_tds[1..table_tds.length].each do |table_td|
+	signups = table_tds[1].text.to_i
+	activations = table_tds[2].text.to_i
+	firstcalls = table_tds[3].text.to_i
 
-          puts table_td.text
-      
-        end
+	puts "#{heading}, #{date_string}: #{signups}, #{activations}, #{firstcalls}"	
 
       end
 
@@ -54,8 +57,16 @@ def FormatAndStore()
 
   end
 
-  puts latest_date
+  totals = report.xpath('//b[contains(text(),"14 Days")][1]/preceding-sibling::table[1]/tr/td')
 
-  report.xpath('//b[contains(text(),"14 Days")][1]/preceding-sibling::table[1]/tr/td').each { |child| puts child.text.to_i }
+  active = nil
+  signups = totals.children[0].text.to_i
+  activations = totals.children[1].text.to_i
+  firstcalls = totals.children[2].text.to_i
+  active = totals.children[3].text.to_i unless totals.children[3].nil?
+
+  brand_id = Brand.find_by_name("Fonic").id
+
+  TotalRecord.create(:date => latest_date_string, :signups => signups, :activations => activations, :firstcalls => firstcalls, :active => active, :brand_id => brand_id)
 
 end
