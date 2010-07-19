@@ -4,5 +4,6 @@ tmp/**/*
 doc/api
 doc/app
 db/*.sqlite3
+lib/tasks/config
 *.swp
 *~
