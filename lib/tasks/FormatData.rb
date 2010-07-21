@@ -67,6 +67,16 @@ def FormatAndStore()
 
   brand_id = Brand.find_by_name("Fonic").id
 
-  TotalRecord.create(:date => latest_date_string, :signups => signups, :activations => activations, :firstcalls => firstcalls, :active => active, :brand_id => brand_id)
+  existing_total_record = TotalRecord.find_by_date(latest_date_string)
+
+  if existing_total_record.nil? then
+
+    TotalRecord.create(:date => latest_date_string, :signups => signups, :activations => activations, :firstcalls => firstcalls, :active => active, :brand_id => brand_id)
+
+  else
+
+    puts "Total record for #{latest_date_string} exists already!"
+
+  end
 
 end

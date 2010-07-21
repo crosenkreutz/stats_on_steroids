@@ -9,11 +9,10 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100717175352) do
+ActiveRecord::Schema.define(:version => 20100721134914) do
 
   create_table "brands", :force => true do |t|
     t.string   "name"
-    t.string   "brand_type"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
