@@ -3,6 +3,20 @@ require 'nokogiri'
 require 'time'
 require 'parsedate'
 
+def UpdateRecord(db_record, new_record, kind)
+
+  db_record.signups = [new_record.signups, db_record.signups].max
+  db_record.activations = [new_record.activations, db_record.activations].max
+  db_record.firstcalls = [new_record.firstcalls, db_record.firstcalls].max
+
+  if kind == "total" then
+    db_record.active = [new_record.active, db_record.active].max if new_record.active
+  end
+
+  db_record.save
+
+end
+
 def FormatAndStore()
 
   config_file = File.open("./lib/tasks/config", "r")
@@ -24,11 +38,15 @@ def FormatAndStore()
   headings = report.xpath('//b[contains(text(),"14 Days")]')
   tables = report.xpath('//b[contains(text(),"14 Days")][1]/following::table')
 
+  brand_id = Brand.find_by_name("Fonic").id
+
   (0..tables.count-1).each do |i|
 
     table = tables[i]
     heading = headings[i].content.slice(/(^.+) Summary/,1)
     heading = "Shop" unless heading
+
+    channel_id = Channel.find_by_name(heading).id
 		      
     table_trs = table.css('tr')
     table_trs.each do |table_tr|
@@ -49,7 +67,19 @@ def FormatAndStore()
 	activations = table_tds[2].text.to_i
 	firstcalls = table_tds[3].text.to_i
 
-	puts "#{heading}, #{date_string}: #{signups}, #{activations}, #{firstcalls}"	
+        new_channel_record = ChannelRecord.new(:date => date_string, :signups => signups, :activations => activations, :firstcalls => firstcalls, :brand_id => brand_id, :channel_id => channel_id)
+
+        existing_channel_record = ChannelRecord.find_by_date(date_string)
+
+        if existing_channel_record.nil? then
+
+          new_channel_record.save
+
+        else
+
+          UpdateRecord(existing_channel_record, new_channel_record, "channel")
+
+        end
 
       end
 
@@ -65,17 +95,17 @@ def FormatAndStore()
   firstcalls = totals.children[2].text.to_i
   active = totals.children[3].text.to_i unless totals.children[3].nil?
 
-  brand_id = Brand.find_by_name("Fonic").id
+  new_total_record = TotalRecord.new(:date => latest_date_string, :signups => signups, :activations => activations, :firstcalls => firstcalls, :active => active, :brand_id => brand_id)
 
   existing_total_record = TotalRecord.find_by_date(latest_date_string)
 
   if existing_total_record.nil? then
 
-    TotalRecord.create(:date => latest_date_string, :signups => signups, :activations => activations, :firstcalls => firstcalls, :active => active, :brand_id => brand_id)
+    new_total_record.save
 
   else
 
-    puts "Total record for #{latest_date_string} exists already!"
+    UpdateRecord(existing_total_record, new_total_record, "total")
 
   end
 
