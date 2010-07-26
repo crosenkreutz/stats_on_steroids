@@ -5,15 +5,25 @@ require 'parsedate'
 
 def UpdateRecord(db_record, new_record, kind)
 
-  db_record.signups = [new_record.signups, db_record.signups].max
-  db_record.activations = [new_record.activations, db_record.activations].max
-  db_record.firstcalls = [new_record.firstcalls, db_record.firstcalls].max
+  db_sum = db_record.signups + db_record.activations + db_record.firstcalls
+  new_sum = new_record.signups + new_record.activations + new_record.firstcalls
 
-  if kind == "total" then
-    db_record.active = [new_record.active, db_record.active].max if new_record.active
+  if (kind == "total") && new_record.active then
+
+    db_sum += db_record.active
+    new_sum += new_record.active
+
   end
 
-  db_record.save
+  if new_sum > db_sum then
+
+    db_record.signups = new_record.signups
+    db_record.activations = new_record.activations
+    db_record.firstcalls = new_record.firstcalls
+    db_record.active = new_record.active if (kind == "total") && new_record.active
+    db_record.save
+
+  end 
 
 end
 
@@ -46,7 +56,16 @@ def FormatAndStore()
     heading = headings[i].content.slice(/(^.+) Summary/,1)
     heading = "Shop" unless heading
 
-    channel_id = Channel.find_by_name(heading).id
+    if Channel.find_by_name(heading) then
+
+      channel_id = Channel.find_by_name(heading).id
+
+    else
+
+      new_channel = Channel.create(:name => heading)
+      channel_id = new_channel.id
+
+    end
 		      
     table_trs = table.css('tr')
     table_trs.each do |table_tr|
@@ -69,15 +88,15 @@ def FormatAndStore()
 
         new_channel_record = ChannelRecord.new(:date => date_string, :signups => signups, :activations => activations, :firstcalls => firstcalls, :brand_id => brand_id, :channel_id => channel_id)
 
-        existing_channel_record = ChannelRecord.find_by_date(date_string)
+        existing_channel_record_list = ChannelRecord.find(:all, :conditions => {:date => date_string, :brand_id => brand_id, :channel_id => channel_id})
 
-        if existing_channel_record.nil? then
+        if existing_channel_record_list.empty? then
 
           new_channel_record.save
 
         else
 
-          UpdateRecord(existing_channel_record, new_channel_record, "channel")
+          UpdateRecord(existing_channel_record_list[0], new_channel_record, "channel")
 
         end
 
