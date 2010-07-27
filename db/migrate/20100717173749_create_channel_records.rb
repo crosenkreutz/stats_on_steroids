@@ -7,6 +7,7 @@ class CreateChannelRecords < ActiveRecord::Migration
       t.integer :firstcalls
       t.integer :brand_id
       t.integer :channel_id
+      t.integer :processed_file_id
 
       t.timestamps
     end
