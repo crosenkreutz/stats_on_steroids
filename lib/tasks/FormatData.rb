@@ -2,6 +2,25 @@ require 'rubygems'
 require 'nokogiri'
 require 'time'
 require 'parsedate'
+require 'ftools'
+
+def Configuration()
+
+  config_file = File.open("./lib/tasks/config", "r")
+  path = ''
+
+  config_file.each_line do |line|
+
+    key, value = line.split(':')
+    value.strip!
+
+    path = value if key == 'Path'
+
+  end
+
+  return path
+
+end
 
 def UpdateRecord(db_record, new_record, kind)
 
@@ -27,23 +46,11 @@ def UpdateRecord(db_record, new_record, kind)
 
 end
 
-def FormatAndStore()
-
-  config_file = File.open("./lib/tasks/config", "r")
-  path = ''
-
-  config_file.each_line do |line|
-
-    key, value = line.split(':')
-    value.strip!
-
-    path = value if key == 'Path'
-
-  end
+def ProcessFile(file_name)
 
   latest_date = 0
   latest_date_string = ""
-  report = Nokogiri::HTML(open("#{path}Fonic/Original Message 5163.eml"))
+  report = Nokogiri::HTML(open(file_name))
 
   headings = report.xpath('//b[contains(text(),"14 Days")]')
   tables = report.xpath('//b[contains(text(),"14 Days")][1]/following::table')
@@ -127,5 +134,43 @@ def FormatAndStore()
     UpdateRecord(existing_total_record, new_total_record, "total")
 
   end
+
+end
+
+def FormatAndStore()
+
+  path = Configuration()
+  Dir.chdir(path)
+  brand_directories = Dir["*"]
+
+  brand_directories.each do |brand_directory|
+
+    if Brand.find_by_name(brand_directory) then
+    
+      brand_id = Brand.find_by_name(brand_directory).id
+
+    else
+
+      new_brand = Brand.create(:name => brand_directory)
+      brand_id = new_brand.id
+
+    end
+
+    Dir.chdir("#{path}#{brand_directory}")
+    report_files = Dir["*"]
+
+    report_files.each do |report_file|
+
+      existing_file = ProcessedFile.find(:all, :conditions => {:brand_id => brand_id, :name => report_file})
+
+    end
+
+  end
+
+  gets
+
+  file_name = "#{path}Fonic/Original Message 5163.eml"  
+
+  ProcessFile(file_name)
 
 end
