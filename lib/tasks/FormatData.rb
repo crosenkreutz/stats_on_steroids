@@ -40,13 +40,14 @@ def UpdateRecord(db_record, new_record, kind)
     db_record.activations = new_record.activations
     db_record.firstcalls = new_record.firstcalls
     db_record.active = new_record.active if (kind == "total") && new_record.active
+    db_record.processed_file_id = new_record.processed_file_id unless kind == "total"
     db_record.save
 
   end 
 
 end
 
-def ProcessFile(file_name)
+def ProcessFile(file_name, brand_id, processed_file_id)
 
   latest_date = 0
   latest_date_string = ""
@@ -54,8 +55,6 @@ def ProcessFile(file_name)
 
   headings = report.xpath('//b[contains(text(),"14 Days")]')
   tables = report.xpath('//b[contains(text(),"14 Days")][1]/following::table')
-
-  brand_id = Brand.find_by_name("Fonic").id
 
   (0..tables.count-1).each do |i|
 
@@ -93,7 +92,7 @@ def ProcessFile(file_name)
 	activations = table_tds[2].text.to_i
 	firstcalls = table_tds[3].text.to_i
 
-        new_channel_record = ChannelRecord.new(:date => date_string, :signups => signups, :activations => activations, :firstcalls => firstcalls, :brand_id => brand_id, :channel_id => channel_id)
+        new_channel_record = ChannelRecord.new(:date => date_string, :signups => signups, :activations => activations, :firstcalls => firstcalls, :brand_id => brand_id, :channel_id => channel_id, :processed_file_id => processed_file_id)
 
         existing_channel_record_list = ChannelRecord.find(:all, :conditions => {:date => date_string, :brand_id => brand_id, :channel_id => channel_id})
 
@@ -145,32 +144,40 @@ def FormatAndStore()
 
   brand_directories.each do |brand_directory|
 
-    if Brand.find_by_name(brand_directory) then
+    if brand_directory != "Tchibo" then
+
+      if Brand.find_by_name(brand_directory) then
     
-      brand_id = Brand.find_by_name(brand_directory).id
+        brand_id = Brand.find_by_name(brand_directory).id
 
-    else
+      else
 
-      new_brand = Brand.create(:name => brand_directory)
-      brand_id = new_brand.id
+        new_brand = Brand.create(:name => brand_directory)
+        brand_id = new_brand.id
 
-    end
+      end
 
-    Dir.chdir("#{path}#{brand_directory}")
-    report_files = Dir["*"]
+      Dir.chdir("#{path}#{brand_directory}")
+      report_files = Dir["*"]
 
-    report_files.each do |report_file|
+      report_files.each do |report_file|
 
-      existing_file = ProcessedFile.find(:all, :conditions => {:brand_id => brand_id, :name => report_file})
+        existing_file = ProcessedFile.find(:all, :conditions => {:brand_id => brand_id, :name => report_file})
+      
+        if existing_file.empty? then
+
+          new_file = ProcessedFile.create(:brand_id => brand_id, :name => report_file)
+          processed_file_id = new_file.id
+          file_name = "#{path}#{brand_directory}/"+new_file.name
+          puts "#{brand_directory}/"+new_file.name
+          ProcessFile(file_name, brand_id, processed_file_id)
+
+        end
+
+      end
 
     end
 
   end
-
-  gets
-
-  file_name = "#{path}Fonic/Original Message 5163.eml"  
-
-  ProcessFile(file_name)
 
 end
