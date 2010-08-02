@@ -49,6 +49,7 @@ ActiveRecord::Schema.define(:version => 20100727124007) do
     t.integer  "firstcalls"
     t.integer  "active"
     t.integer  "brand_id"
+    t.integer  "processed_file_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

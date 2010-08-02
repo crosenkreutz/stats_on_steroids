@@ -7,6 +7,7 @@ class CreateTotalRecords < ActiveRecord::Migration
       t.integer :firstcalls
       t.integer :active
       t.integer :brand_id
+      t.integer :processed_file_id
 
       t.timestamps
     end
