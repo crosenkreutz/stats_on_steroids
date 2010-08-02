@@ -112,9 +112,12 @@ signup_links.each do |signup_link|
     brand_name = brand_link.text.slice(/Folder: (.+) Signup/,1)
     brand_name.sub!(/VZ Mobil\z/,"VZ Mobile")
 
-    brand_link.click
+    if (brand_name != "Tchibo") && !(brand_name =~ /^AW/) then
 
-    get_email_links(agent, brand_name)
+      brand_link.click
+      get_email_links(agent, brand_name)
+
+    end
 
   end
 
