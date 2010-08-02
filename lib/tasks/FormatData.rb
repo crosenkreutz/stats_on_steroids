@@ -131,15 +131,15 @@ def ProcessFile(file_name, brand_id, processed_file_id)
 
       new_total_record = TotalRecord.new(:date => latest_date_string, :signups => signups, :activations => activations, :firstcalls => firstcalls, :active => active, :brand_id => brand_id, :processed_file_id => processed_file_id)
 
-      existing_total_record = TotalRecord.find_by_date(latest_date_string)
+      existing_total_record = TotalRecord.find(:all, :conditions => {:date => latest_date_string, :brand_id => brand_id})
 
-      if existing_total_record.nil? then
+      if existing_total_record.empty? then
 
         new_total_record.save
 
       else
 
-        UpdateRecord(existing_total_record, new_total_record, "total")
+        UpdateRecord(existing_total_record[0], new_total_record, "total")
 
       end
 
