@@ -24,23 +24,14 @@ end
 
 def UpdateRecord(db_record, new_record, kind)
 
-  db_sum = db_record.signups + db_record.activations + db_record.firstcalls
-  new_sum = new_record.signups + new_record.activations + new_record.firstcalls
-
-  if (kind == "total") && new_record.active then
-
-    db_sum += db_record.active
-    new_sum += new_record.active
-
-  end
-
-  if new_sum > db_sum then
+  if new_record.file_date > db_record.file_date then
 
     db_record.signups = new_record.signups
     db_record.activations = new_record.activations
     db_record.firstcalls = new_record.firstcalls
+    db_record.file_date = new_record.file_date
     db_record.active = new_record.active if (kind == "total") && new_record.active
-    db_record.processed_file_id = new_record.processed_file_id unless kind == "total"
+    db_record.processed_file_id = new_record.processed_file_id
     db_record.save
 
   end 
@@ -49,9 +40,9 @@ end
 
 def ProcessFile(file_name, brand_id, processed_file_id)
 
-  latest_date = 0
-  latest_date_string = ""
   report = Nokogiri::HTML(open(file_name))
+  file_date_string = report.children[1].text.slice(/Date: [a-zA-Z]+, (.*) \+/,1)
+  file_date = Time.local(*ParseDate.parsedate(file_date_string))
 
   headings = report.xpath('//b[contains(text(),"14")]')
   tables = report.xpath('//b[contains(text(),"14")][1]/following::table')
@@ -84,19 +75,15 @@ def ProcessFile(file_name, brand_id, processed_file_id)
         if date_string =~ /\d{4}-\d{2}-\d{2}/ then
 
           date_array = ParseDate::parsedate(date_string)
-          date = Time.local(*date_array).to_i
-	  if date > latest_date then
-            latest_date = date
-	    latest_date_string = date_string
-	  end
+          date = Time.local(*date_array)
 
   	  signups = table_tds[1].text.to_i
 	  activations = table_tds[2].text.to_i
 	  firstcalls = table_tds[3].text.to_i
 
-          new_channel_record = ChannelRecord.new(:date => date_string, :signups => signups, :activations => activations, :firstcalls => firstcalls, :brand_id => brand_id, :channel_id => channel_id, :processed_file_id => processed_file_id)
+          new_channel_record = ChannelRecord.new(:date => date, :signups => signups, :activations => activations, :firstcalls => firstcalls, :brand_id => brand_id, :channel_id => channel_id, :processed_file_id => processed_file_id, :file_date => file_date)
 
-          existing_channel_record_list = ChannelRecord.find(:all, :conditions => {:date => date_string, :brand_id => brand_id, :channel_id => channel_id})
+          existing_channel_record_list = ChannelRecord.find(:all, :conditions => {:date => date, :brand_id => brand_id, :channel_id => channel_id})
 
           if existing_channel_record_list.empty? then
 
@@ -129,9 +116,9 @@ def ProcessFile(file_name, brand_id, processed_file_id)
       firstcalls = totals_tds[2].text.to_i
       active = totals_tds[3].text.to_i unless totals_tds[3].nil?
 
-      new_total_record = TotalRecord.new(:date => latest_date_string, :signups => signups, :activations => activations, :firstcalls => firstcalls, :active => active, :brand_id => brand_id, :processed_file_id => processed_file_id)
+      new_total_record = TotalRecord.new(:file_date => file_date, :signups => signups, :activations => activations, :firstcalls => firstcalls, :active => active, :brand_id => brand_id, :processed_file_id => processed_file_id)
 
-      existing_total_record = TotalRecord.find(:all, :conditions => {:date => latest_date_string, :brand_id => brand_id})
+      existing_total_record = TotalRecord.find(:all, :conditions => {:file_date => file_date, :brand_id => brand_id})
 
       if existing_total_record.empty? then
 
