@@ -18,14 +18,14 @@ ActiveRecord::Schema.define(:version => 20100727124007) do
   end
 
   create_table "channel_records", :force => true do |t|
-    t.date     "date"
+    t.datetime "date"
     t.integer  "signups"
     t.integer  "activations"
     t.integer  "firstcalls"
     t.integer  "brand_id"
     t.integer  "channel_id"
     t.integer  "processed_file_id"
-    t.date     "file_date"
+    t.datetime "file_date"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -44,7 +44,7 @@ ActiveRecord::Schema.define(:version => 20100727124007) do
   end
 
   create_table "total_records", :force => true do |t|
-    t.date     "file_date"
+    t.datetime "file_date"
     t.integer  "signups"
     t.integer  "activations"
     t.integer  "firstcalls"

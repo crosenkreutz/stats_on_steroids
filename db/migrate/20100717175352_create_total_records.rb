@@ -1,7 +1,7 @@
 class CreateTotalRecords < ActiveRecord::Migration
   def self.up
     create_table :total_records do |t|
-      t.date :file_date
+      t.datetime :file_date
       t.integer :signups
       t.integer :activations
       t.integer :firstcalls
