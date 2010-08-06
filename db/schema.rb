@@ -18,7 +18,7 @@ ActiveRecord::Schema.define(:version => 20100727124007) do
   end
 
   create_table "channel_records", :force => true do |t|
-    t.datetime "date"
+    t.date     "date"
     t.integer  "signups"
     t.integer  "activations"
     t.integer  "firstcalls"

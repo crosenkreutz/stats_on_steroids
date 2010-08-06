@@ -1,7 +1,7 @@
 class CreateChannelRecords < ActiveRecord::Migration
   def self.up
     create_table :channel_records do |t|
-      t.datetime :date
+      t.date :date
       t.integer :signups
       t.integer :activations
       t.integer :firstcalls
