@@ -1,0 +1,14 @@
+<% title "Channels" %>
+
+<table>
+  <tr>
+    <th>Name</th>
+  </tr>
+  <% for channel in @channels %>
+    <tr>
+      <td><%=h channel.name %></td>
+      <td><%= link_to "Show", channel %></td>
+    </tr>
+  <% end %>
+</table>
+

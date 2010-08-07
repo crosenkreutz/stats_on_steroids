@@ -1,0 +1,2 @@
+module ChannelRecordsHelper
+end

@@ -1,0 +1,14 @@
+<% title "Brands" %>
+
+<table>
+  <tr>
+    <th>Name</th>
+  </tr>
+  <% for brand in @brands %>
+    <tr>
+      <td><%=h brand.name %></td>
+      <td><%= link_to "Show", brand %></td>
+    </tr>
+  <% end %>
+</table>
+

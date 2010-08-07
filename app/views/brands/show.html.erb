@@ -1,0 +1,89 @@
+<% title "Brand" %>
+
+<p>
+  <strong>Name:</strong>
+  <%=h @brand.name %>
+</p>
+<ul>
+	<% for channel in @channels %>
+	<li><%= link_to channel.name, channel_record_path(channel.id, :brand_id => @brand )%></li>
+	<% end %>
+</ul>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    new Highcharts.Chart({
+      chart: {
+        renderTo: "gen_chart",
+		zoomType: 'xy'
+
+      },
+	  title: {
+	    text: "Subscritions by Day"
+	  },
+	 plotOptions:{
+		line: {
+			lineWidth: 1,
+			marker: {
+				radius: 0
+			}
+		}
+		
+		
+	},
+	  xAxis: {
+	    type: "datetime",
+		maxZoom: 2 * 24 * 3600000 // 14 Tage
+	  },
+	  yAxis: {
+		min: 1,
+	    title: {
+	      text: "Customer in millions",
+		  
+	      
+		 
+	    }
+	  },
+	  series: [
+		{
+			name: "SignUps",
+			data: [
+			<% for total_record in @total_records %>
+			[<%= total_record.file_date.to_i * 1000  %>,<%= total_record.signups.to_f / 1000000 %>],
+			<% end %>
+			]
+		},
+		{
+			name: "Activations",
+			data: [
+			<% for total_record in @total_records %>
+			[<%= total_record.file_date.to_i * 1000  %>,<%= total_record.activations.to_f / 1000000 %>],
+			<% end %>
+			]
+		},
+		{
+			name: "First call",
+			data: [
+			<% for total_record in @total_records %>
+			[<%= total_record.file_date.to_i * 1000  %>,<%= total_record.firstcalls.to_f / 1000000 %>],
+			<% end %>
+			]
+		},
+		{
+			name: "Active",
+			data: [
+			<% for total_record in @total_records %>
+			[<%= total_record.file_date.to_i * 1000  %>,<%= total_record.active.to_f / 1000000 %>],
+			<% end %>
+			]
+		}
+		]
+    });
+  });
+</script>
+
+<div id="gen_chart" style="width:100%; height:400px;"></div>
+
+<p>
+  <%= link_to "View All", brands_path %>
+</p>

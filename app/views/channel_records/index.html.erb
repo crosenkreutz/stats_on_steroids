@@ -1,0 +1,28 @@
+<% title "Channel Records" %>
+
+<table>
+  <tr>
+    <th>Date</th>
+    <th>Signups</th>
+    <th>Activations</th>
+    <th>Firstcalls</th>
+    <th>Brand</th>
+    <th>Channel</th>
+    <th>Processed File</th>
+    <th>File Date</th>
+  </tr>
+  <% for channel_record in @channel_records %>
+    <tr>
+      <td><%=h channel_record.date %></td>
+      <td><%=h channel_record.signups %></td>
+      <td><%=h channel_record.activations %></td>
+      <td><%=h channel_record.firstcalls %></td>
+      <td><%=h channel_record.brand_id %></td>
+      <td><%=h channel_record.channel_id %></td>
+      <td><%=h channel_record.processed_file_id %></td>
+      <td><%=h channel_record.file_date %></td>
+      <td><%= link_to "Show", channel_record %></td>
+    </tr>
+  <% end %>
+</table>
+
