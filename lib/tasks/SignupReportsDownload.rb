@@ -14,6 +14,7 @@ def encoding_convert(s)
   link.gsub!(/\\u00257b/, '{')
   link.gsub!(/\\u00252d/, '-')
   link.gsub!(/\\u00257d/, '}')
+  link.gsub!(/\\u0025/, '%')
 
   return link
 
@@ -115,7 +116,17 @@ signup_links.each do |signup_link|
     if !(brand_name =~ /^AW|Tchibo/) then
 
       brand_link.click
+      next_link_js = agent.page.link_with(:text => 'Next')
       get_email_links(agent, brand_name)
+
+      while next_link_js
+
+        next_link = encoding_convert(next_link_js.attributes["onclick"])
+        agent.get(next_link)
+        next_link_js = agent.page.link_with(:text => 'Next')
+        get_email_links(agent, brand_name)
+
+      end
 
     end
 
