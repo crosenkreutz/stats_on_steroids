@@ -42,7 +42,7 @@ var chart;
 			name: "SignUps",
 			data: [
 			<% for channel_record in @channel_records %>
-			[<%= channel_record.date.to_i * 1000  %>,<%= channel_record.signups.to_f %>],
+			[<%= channel_record.date.to_datetime.to_i * 1000  %>,<%= channel_record.signups.to_f %>],
 			<% end %>
 			]
 		},
@@ -50,7 +50,7 @@ var chart;
 			name: "Activations",
 			data: [
 			<% for channel_record in @channel_records %>
-			[<%= channel_record.date.to_i * 1000  %>,<%= channel_record.activations.to_f %>],
+			[<%= channel_record.date.to_datetime.to_i * 1000  %>,<%= channel_record.activations.to_f %>],
 			<% end %>
 			]
 		},
@@ -58,7 +58,7 @@ var chart;
 			name: "First call",
 			data: [
 			<% for channel_record in @channel_records %>
-			[<%= channel_record.date.to_i * 1000  %>,<%= channel_record.firstcalls.to_f  %>],
+			[<%= channel_record.date.to_datetime.to_i * 1000  %>,<%= channel_record.firstcalls.to_f  %>],
 			<% end %>
 			]
 		}
