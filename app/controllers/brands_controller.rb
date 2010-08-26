@@ -7,6 +7,7 @@ class BrandsController < ApplicationController
     @brand = Brand.find(params[:id])
     @channels = @brand.channels
     @total_records = @brand.total_records.sort_by(&:file_date)
+    @channel_records = @brand.channel_records
   end
   
   def simple_stat

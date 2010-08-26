@@ -15,11 +15,66 @@
     new Highcharts.Chart({
       chart: {
         renderTo: "gen_chart",
+	zoomType: 'xy'
+      },
+      title: {
+	text: "Subscritions by Day"
+      },
+      plotOptions:{
+	line: {
+	  lineWidth: 1,
+	  marker: {
+            radius: 0
+	  }
+	}		
+      },
+      xAxis: {
+	    type: "datetime",
+		maxZoom: 2 * 24 * 3600000 // 2 Tage
+	  },
+	  yAxis: {
+	    title: {
+	      text: "Customers"
+	    },
+            labels: {
+              rotation: 270,
+              align: "center"
+            },
+            minPadding: 0.0,
+            maxPadding: 0.0
+	  },
+	  series: [
+		{
+			name: "SignUps",
+			data: <%= date_number_array(@total_records, :signups) %>
+		},
+		{
+			name: "Activations",
+			data: <%= date_number_array(@total_records, :activations) %>
+		},
+		{
+			name: "First call",
+			data: <%= date_number_array(@total_records, :firstcalls) %>
+		},
+		{
+			name: "Active",
+			data: <%= date_number_array(@total_records, :active) %>
+		}
+		]
+    });
+  });
+</script>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    new Highcharts.Chart({
+      chart: {
+        renderTo: "rat_chart",
 		zoomType: 'xy'
 
       },
 	  title: {
-	    text: "Subscritions by Day"
+	    text: "Ratios by Day"
 	  },
 	 plotOptions:{
 		line: {
@@ -33,56 +88,88 @@
 	},
 	  xAxis: {
 	    type: "datetime",
-		maxZoom: 2 * 24 * 3600000 // 14 Tage
+		maxZoom: 2 * 24 * 3600000 // 2 Tage
 	  },
 	  yAxis: {
-		min: 1,
 	    title: {
-	      text: "Customer in millions",
-		  
-	      
-		 
-	    }
+	      text: "Ratio"
+	    },
+            labels: {
+              rotation: 270,
+              align: "center"
+            },
+            minPadding: 0.0,
+            maxPadding: 0.0
 	  },
 	  series: [
 		{
-			name: "SignUps",
-			data: [
-			<% for total_record in @total_records %>
-			[<%= total_record.file_date.to_i * 1000  %>,<%= total_record.signups.to_f / 1000000 %>],
-			<% end %>
-			]
+			name: "Ratio Activations vs. Signups",
+			data: <%= date_ratio_array(@total_records, :activations, :signups) %>
 		},
 		{
-			name: "Activations",
-			data: [
-			<% for total_record in @total_records %>
-			[<%= total_record.file_date.to_i * 1000  %>,<%= total_record.activations.to_f / 1000000 %>],
-			<% end %>
-			]
+			name: "Ratio First Calls vs. Signups",
+			data: <%= date_ratio_array(@total_records, :firstcalls, :signups) %>
 		},
 		{
-			name: "First call",
-			data: [
-			<% for total_record in @total_records %>
-			[<%= total_record.file_date.to_i * 1000  %>,<%= total_record.firstcalls.to_f / 1000000 %>],
-			<% end %>
-			]
+			name: "Ratio Active vs. Signups",
+			data: <%= date_ratio_array(@total_records, :active, :signups) %>
 		},
 		{
-			name: "Active",
-			data: [
-			<% for total_record in @total_records %>
-			[<%= total_record.file_date.to_i * 1000  %>,<%= total_record.active.to_f / 1000000 %>],
-			<% end %>
-			]
+			name: "Ratio First Calls vs. Activations",
+			data: <%= date_ratio_array(@total_records, :firstcalls, :activations) %>
+		},
+		{
+			name: "Ratio Active vs. Activations",
+			data: <%= date_ratio_array(@total_records, :active, :activations) %>
+		},
+		{
+			name: "Ratio Active vs. First Calls",
+			data: <%= date_ratio_array(@total_records, :active, :firstcalls) %>
 		}
 		]
     });
   });
 </script>
 
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    new Highcharts.Chart({
+      chart: {
+        renderTo: "pie_chart",
+		zoomType: 'xy'
+
+        },
+        title: {
+	  text: "Contributions to total signups by channel"
+	},
+        tooltip: {
+          formatter: function() {
+            return '<b>'+ this.point.name +'<b>: '+ this.y +' %';
+          }
+        },
+	plotOptions:{
+          pie: {
+	  }
+	},
+	xAxis: {
+	},
+	yAxis: {
+	},
+	series: [{
+          type: 'pie',
+          name: 'Contribution to total subscriptions',
+          data: <%= contributions(@channel_records, @channels) %>
+        }]
+    });
+  });
+</script>
+
 <div id="gen_chart" style="width:100%; height:400px;"></div>
+<div id="rat_chart" style="width:100%; height:400px;"></div>
+<div id="pie_chart" style="width:100%; height:400px;"></div>
+<p>
+  This includes data only from <%= @channel_records.minimum(:date).strftime("%d-%m-%Y") %> to <%= @channel_records.maximum(:date).strftime("%d-%m-%Y") %>. This corresponds to <%= "%.2f" % (@channel_records.sum(:signups).to_f / @total_records.last.signups.to_f * 100.0) %> percent of total signups.
+</p>
 
 <p>
   <%= link_to "View All", brands_path %>
